@@ -37,7 +37,7 @@ module fibonacci_2
   // Implement a module that generates two fibonacci numbers per cycle
   always_ff @ (posedge clk)
     if (rst)
-      { num, num2, num3} <= { 16'd1, 16'd1, 16'd2};
+      { num, num2} <= { 16'd1, 16'd1};
     else begin
 	  { num, num2} <= { num3, num2 + num3};
 	end
@@ -64,7 +64,7 @@ module testbench;
 
   initial
   begin
-    clk = 1;
+    clk = 0;
 
     forever
       # 500 clk = ~ clk;

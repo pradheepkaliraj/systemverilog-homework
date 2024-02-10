@@ -27,31 +27,19 @@ module serial_adder_with_vld
   
   logic carry = 0;
   logic sum;
-  logic last_ff;
-  
-	always_ff @ (posedge clk) begin
-		if(last)
-			last_ff <= 1'b1;
-		else
-			last_ff <= 1'b0;
-	end
+ 
 
     always_ff @ (posedge clk) begin
-		if (rst) begin
-			sum <= '0;
+		if (rst || last) begin
 			carry <= '0;
-		end else if (vld) begin
-			{sum, carry} <= {(a ^ b ^ carry), ((a & b) | ( a & carry) | (b & carry))};			
-			if (last) begin
-				carry <= 0;
-			end
-			//$display ("%t sum %b a %b b %b carry %b",$time, sum,  a , b, carry);
 		end else begin
-			sum <= 0;
+			carry <= ((a & b) | ( a & carry) | (b & carry));		
+			//$display ("%t sum %b a %b b %b carry %b",$time, sum,  a , b, carry);
 		end
 	end
-
-
+	
+	assign sum = (a ^ b ^ carry);	
+ 
 endmodule
 
 //----------------------------------------------------------------------------
@@ -109,7 +97,7 @@ module testbench;
       b    <= seq_b    [i];
       last <= seq_last [i];
 
-      @ (negedge clk);
+      @ (posedge clk);
 
       if (vld) begin
         $display ("%t vld %b, last %b, %b+%b=%b (expected %b)",

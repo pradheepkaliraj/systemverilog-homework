@@ -37,7 +37,6 @@ module serial_adder_using_logic_operations_only
   input  rst,
   input  a,
   input  b,
-  output carry,
   output sum
 );
 
@@ -60,15 +59,16 @@ module serial_adder_using_logic_operations_only
 	a = 1, b = 1, sum = 0, carry = 1. It is observerd on the waves, but not on the log.
 	This might be due to a race condition between tb and dut as they are both working on posedge
 	*/
-    always_ff @ (negedge clk) begin
+    always_ff @ (posedge clk) begin
 		if (rst) begin
-			carry = '0;
-			sum = '0;
+			carry <= '0;
 		end else begin
-			{sum, carry} = {(a ^ b ^ carry), ((a & b) | ( a & carry) | (b & carry))};			
+			carry <= ((a & b) | ( a & carry) | (b & carry));
 			//$display ("%t sum %b a %b b %b carry %b",$time, sum,  a , b, carry);
 		end
 	end
+	
+	assign sum = (a ^ b ^ carry);			
 
 	
 
@@ -106,7 +106,7 @@ module testbench;
 
   logic a, b, sa_sum, salo_sum, carry;
   serial_adder                             sa   (.sum (sa_sum),   .*);
-  serial_adder_using_logic_operations_only salo (.sum (salo_sum), .carry(carry), .*);
+  serial_adder_using_logic_operations_only salo (.sum (salo_sum), .*);
 
   localparam n = 16;
 
@@ -129,9 +129,9 @@ module testbench;
 
       @ (posedge clk);
 
-      $display ("%t %b %b SUM OBS: %b EXP:(%b) carry  %b",
+      $display ("%t %b %b SUM OBS: %b EXP:(%b)",
         $time, a, b,
-        salo_sum, seq_salo_sum [i], carry);
+        salo_sum, seq_salo_sum [i]);
 
       if (   sa_sum   !== seq_sa_sum   [i]
           || salo_sum !== seq_salo_sum [i])
