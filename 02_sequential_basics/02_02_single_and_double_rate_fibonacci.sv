@@ -44,10 +44,10 @@ module fibonacci_2
 	
   always_comb// @ (negedge clk)
     if (rst)
-       num3 = 16'd2;
-    else begin
-	  num3  = num + num2 ;
-  end
+	num3 = 16'd2;
+    else
+	num3  = num + num2 ;
+
 	
 	
 
