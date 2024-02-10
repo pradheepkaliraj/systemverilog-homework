@@ -47,7 +47,7 @@ module fibonacci_2
        num3 = 16'd2;
     else begin
 	  num3  = num + num2 ;
-	end
+  end
 	
 	
 
