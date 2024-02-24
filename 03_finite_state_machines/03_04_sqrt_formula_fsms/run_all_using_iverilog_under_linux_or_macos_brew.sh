@@ -27,6 +27,6 @@ if [ -f dump.vcd ] ; then
 fi
 
 rm -f a.out
-# rm -f dump.vcd
+#rm -f dump.vcd
 
 grep -e PASS -e FAIL -e error log.txt

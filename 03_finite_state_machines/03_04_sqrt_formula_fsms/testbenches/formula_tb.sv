@@ -310,6 +310,9 @@ module formula_tb
 
     initial
     begin
+		`ifdef __ICARUS__
+			$dumpvars;
+		`endif	
         repeat (1000) @ (posedge clk);
         $display ("%s FAIL: timeout!", test_id);
         $finish;
