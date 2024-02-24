@@ -35,4 +35,84 @@ module formula_2_fsm
     // You can download this issue from https://fpga-systems.ru/fsm
 
 
+	enum logic [1:0] {
+		st_idle		 	 = 2'b00,
+		wait_c_res	 	 = 2'b01,
+		st_wait_bc_res	 = 2'b10,
+		st_wait_abc_res  = 2'b11
+	} state, next_state;
+	
+	always_comb
+		begin
+			next_state  = state;
+
+			isqrt_x_vld = '0;
+			isqrt_x     = 'x;  // Don't care
+
+			case (state)
+				st_idle:
+					begin
+						isqrt_x = c;
+
+						if (arg_vld)
+							begin
+								isqrt_x_vld = '1;
+								next_state  = wait_c_res;
+							end
+
+						end
+				wait_c_res:
+					begin
+						isqrt_x = isqrt_y + b;
+
+						if (isqrt_y_vld)
+							begin
+								isqrt_x_vld = '1;
+								next_state  = st_wait_bc_res;
+							end
+					end
+
+				st_wait_bc_res:
+					begin
+						isqrt_x = isqrt_y  + a;
+	
+						if (isqrt_y_vld)
+							begin
+								isqrt_x_vld = '1;
+								next_state  = st_wait_abc_res;
+							end
+					end
+
+				st_wait_abc_res:
+					begin
+						if (isqrt_y_vld)
+							begin
+								next_state = st_idle;
+							end
+					end
+			endcase		
+		end
+		
+    //------------------------------------------------------------------------
+    // Assigning next state
+
+    always_ff @ (posedge clk)
+        if (rst)
+            state <= st_idle;
+        else
+            state <= next_state;		
+
+
+    //------------------------------------------------------------------------
+    // Accumulating the result
+
+    always_ff @ (posedge clk)
+        if (rst) begin
+            res_vld <= '0;
+			res		<= '0;
+        end else begin
+            res_vld <= (state == st_wait_abc_res & isqrt_y_vld);
+			res <= isqrt_y;	
+		end
+
 endmodule
